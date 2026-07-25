@@ -5,7 +5,7 @@ import { Header } from '../components/Header';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useResponsive } from '../hooks/useResponsive';
-import { databases, DATABASE_ID, COLLECTIONS, ID, account } from '../../lib/appwrite';
+import { databases, DATABASE_ID, COLLECTIONS, ID, Query, account } from '../../lib/appwrite';
 import '../styles/dashboard.css';
 
 const MemoSidebar = memo(Sidebar);
@@ -61,9 +61,9 @@ export function MoodTrackerPage() {
   const loadMoodHistory = async () => {
     try {
       const user = await account.get();
-      const res  = await databases.listDocuments(DATABASE_ID, COLLECTIONS.mood);
-      const mine = res.documents.filter(d => d.userID === user.$id);
-      const mapped: MoodEntry[] = mine.map(doc => ({
+      const res  = await databases.listDocuments(DATABASE_ID, COLLECTIONS.mood,
+        [Query.equal('userID', user.$id), Query.orderDesc('loggedAt'), Query.limit(100)]);
+      const mapped: MoodEntry[] = res.documents.map(doc => ({
         mood:  doc.mood  || 'neutral',
         note:  doc.note  || '',
         time:  new Date(doc.loggedAt).toLocaleString(),

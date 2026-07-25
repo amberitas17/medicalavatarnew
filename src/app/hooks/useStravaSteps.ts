@@ -139,6 +139,19 @@ function setActivityCache(activities: StravaActivity[]) {
   } catch {}
 }
 
+/**
+ * Clear cached Strava step activities and OAuth token. Call on logout/login so
+ * the next user in the same tab never inherits the previous user's step data or
+ * Strava credentials. These live in sessionStorage, which survives the same-tab
+ * reload logout performs. (TOKEN_CACHE_KEY is shared with useStravaHeart.)
+ */
+export function clearStravaStepsCache() {
+  try {
+    sessionStorage.removeItem(CACHE_KEY);
+    sessionStorage.removeItem(TOKEN_CACHE_KEY);
+  } catch { /* ignore */ }
+}
+
 // ── Hook ───────────────────────────────────────────────────────────
 export function useStravaSteps(): StravaState {
   const [stravaSteps,      setStravaSteps]      = useState(0);

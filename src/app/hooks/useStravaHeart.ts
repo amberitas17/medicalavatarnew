@@ -77,6 +77,21 @@ function setHrCache(samples: StravaHeartSample[]) {
   try { sessionStorage.setItem(HR_CACHE_KEY, JSON.stringify({ samples, fetchedAt: Date.now(), dateKey: todayKey() })); } catch {}
 }
 
+/**
+ * Clear the cached Strava heart samples and OAuth token. Call on logout/login
+ * so the next user in the same tab never inherits the previous user's wearable
+ * data or Strava credentials. These live in sessionStorage, which survives the
+ * same-tab reload that logout performs, so clearing them explicitly is required.
+ * (TOKEN_CACHE_KEY is shared with useStravaSteps — clearing it also drops the
+ * Strava connection for steps, which is the correct behaviour on account switch.)
+ */
+export function clearStravaHeartCache() {
+  try {
+    sessionStorage.removeItem(HR_CACHE_KEY);
+    sessionStorage.removeItem(TOKEN_CACHE_KEY);
+  } catch { /* ignore */ }
+}
+
 export function useStravaHeart(): StravaHeartState {
   const [avgHr,       setAvgHr]       = useState(0);
   const [maxHr,       setMaxHr]       = useState(0);

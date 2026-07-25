@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { Link } from 'react-router';
 import { EmotionDetector } from './EmotionDetector';
 import { account } from '../../lib/appwrite';
+import { clearStravaHeartCache } from '../hooks/useStravaHeart';
+import { clearStravaStepsCache } from '../hooks/useStravaSteps';
 
 export function Login() {
-  const navigate = useNavigate();
   const [email, setEmail]                             = useState('');
   const [password, setPassword]                       = useState('');
   const [showEmotionDetector, setShowEmotionDetector] = useState(false);
@@ -33,7 +34,11 @@ export function Login() {
     localStorage.removeItem('healthai_profile');
     localStorage.removeItem('healthai_notifications');
     localStorage.removeItem('healthai_user_id');
-    navigate('/dashboard');
+    localStorage.removeItem('cawil_meals');   // don't inherit a prior user's meals
+    clearStravaHeartCache();   // don't inherit a prior user's Strava HR/token
+    clearStravaStepsCache();   // don't inherit a prior user's Strava steps
+    // Hard load so the profile provider remounts and reads this session.
+    window.location.href = '/dashboard';
   };
 
   const handleSkip = () => {
@@ -41,7 +46,11 @@ export function Login() {
     localStorage.removeItem('healthai_profile');
     localStorage.removeItem('healthai_notifications');
     localStorage.removeItem('healthai_user_id');
-    navigate('/dashboard');
+    localStorage.removeItem('cawil_meals');   // don't inherit a prior user's meals
+    clearStravaHeartCache();   // don't inherit a prior user's Strava HR/token
+    clearStravaStepsCache();   // don't inherit a prior user's Strava steps
+    // Hard load so the profile provider remounts and reads this session.
+    window.location.href = '/dashboard';
   };
 
   return (

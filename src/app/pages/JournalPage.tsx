@@ -4,7 +4,7 @@ import { Header } from '../components/Header';
 import { BookOpen, Plus, X, Trash2, TrendingUp, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useResponsive } from '../hooks/useResponsive';
-import { databases, DATABASE_ID, COLLECTIONS, ID } from '../../lib/appwrite';
+import { databases, DATABASE_ID, COLLECTIONS, ID, Query } from '../../lib/appwrite';
 import { account } from '../../lib/appwrite';
 
 /* ── Assets ─────────────────────────────────────────────────────── */
@@ -87,6 +87,7 @@ export function JournalPage() {
       const res = await databases.listDocuments(
         DATABASE_ID,
         COLLECTIONS.journal,
+        [Query.equal('userID', uid), Query.orderDesc('loggedAt'), Query.limit(100)],
       );
       const mapped: JournalEntry[] = res.documents.map(doc => ({
         id:   doc.$id,
