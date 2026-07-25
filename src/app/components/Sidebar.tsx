@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Activity, Heart, Moon, Flame, Droplet, Footprints, LogOut, ChevronLeft, ChevronRight, BookOpen, Brain, Smile, User, Calculator, ShieldAlert } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router';
+import { account } from '../../lib/appwrite';
+import { clearStravaHeartCache } from '../hooks/useStravaHeart';
+import { clearStravaStepsCache } from '../hooks/useStravaSteps';
 import { useUserProfile, getBMICategory } from '../../context/UserProfileContext';
 import { UserProfileModal } from './UserProfileModal';
 const medicalLogo = '/assets/AIVA.png';
@@ -77,7 +80,19 @@ export function Sidebar() {
     { icon: ShieldAlert, label: 'Fall Detection', path: '/fall-detection', color: '#22c55e' },
   ];
 
-  const handleLogout = () => navigate('/');
+  const handleLogout = async () => {
+    // Actually end the Appwrite session (previously this only routed away,
+    // leaving the session — and the previous user's cached state — alive).
+    try { await account.deleteSession('current'); } catch { /* already gone */ }
+    localStorage.removeItem('healthai_profile');
+    localStorage.removeItem('healthai_notifications');
+    localStorage.removeItem('healthai_user_id');
+    localStorage.removeItem('cawil_meals');   // calorie/meal cache (localStorage)
+    clearStravaHeartCache();   // Strava HR samples + OAuth token (sessionStorage)
+    clearStravaStepsCache();   // Strava step activities (sessionStorage)
+    // Hard load so UserProfileProvider remounts clean for the next user.
+    window.location.href = '/';
+  };
 
   const NavButton = ({ item, i, delay = 0 }: { item: typeof navItems[0]; i: number; delay?: number }) => {
     const Icon = item.icon;

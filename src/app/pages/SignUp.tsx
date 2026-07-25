@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { Link } from 'react-router';
 import { account, ID } from '../../lib/appwrite';
 import { createUserProfile } from '../../services/userService';
 
 export function SignUp() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({ name:'', email:'', password:'', confirmPassword:'' });
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
@@ -29,7 +28,13 @@ export function SignUp() {
       const user = await account.create(ID.unique(), formData.email, formData.password, formData.name);
       await account.createEmailPasswordSession(formData.email, formData.password);
       await createUserProfile(user.$id, formData.name, formData.email);
-      navigate('/dashboard');
+      // Clear any prior user's cached state, then hard-load so the profile
+      // provider remounts and reads THIS new session (a SPA navigate would
+      // keep showing the previous user's name).
+      localStorage.removeItem('healthai_profile');
+      localStorage.removeItem('healthai_notifications');
+      localStorage.removeItem('healthai_user_id');
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Sign up failed. Please try again.');
     } finally {
