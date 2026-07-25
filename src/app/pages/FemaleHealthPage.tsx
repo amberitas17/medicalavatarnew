@@ -10,7 +10,7 @@ import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { useResponsive } from '../hooks/useResponsive';
 import { toast } from 'sonner';
-import { databases, DATABASE_ID, COLLECTIONS, ID, account } from '../../lib/appwrite';
+import { databases, DATABASE_ID, COLLECTIONS, ID, Query, account } from '../../lib/appwrite';
 
 
 const femaleHealthAvatar  = '/assets/femalehealthavatar.png';
@@ -161,11 +161,11 @@ const loadPeriodLogs = async () => {
 
     const res = await databases.listDocuments(
       DATABASE_ID,
-      COLLECTIONS.female_health
+      COLLECTIONS.female_health,
+      [Query.equal('userID', user.$id), Query.orderDesc('date'), Query.limit(100)]
     );
 
     const mapped: PeriodLog[] = res.documents
-      .filter(d => d.userID === user.$id)
       .map(d => ({
         date: d.date,                  // already YYYY-MM-DD
         flow: d.flow || 'light',

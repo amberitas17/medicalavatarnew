@@ -259,12 +259,11 @@ export function StepsPage() {
 
     const res = await databases.listDocuments(
       DATABASE_ID,
-      COLLECTIONS.steps
+      COLLECTIONS.steps,
+      [Query.equal('userID', user.$id), Query.equal('date', today), Query.limit(100)]
     );
 
-    const todayDocs = res.documents.filter(
-      (d: any) => d.userID === user.$id && d.date === today
-    );
+    const todayDocs = res.documents;
 
     const buckets = Array(8).fill(0);
 
@@ -361,12 +360,11 @@ const [streak, setStreak] = useState(0);
 
       const res = await databases.listDocuments(
         DATABASE_ID,
-        COLLECTIONS.users
+        COLLECTIONS.users,
+        [Query.equal('userID', user.$id), Query.limit(1)]
       );
 
-      const userProfile = res.documents.find(
-        (d: any) => d.userID === user.$id
-      );
+      const userProfile = res.documents[0];
 
       if (userProfile) setProfile(userProfile);
     } catch (err) {
@@ -413,8 +411,9 @@ const [streak, setStreak] = useState(0);
     try {
       const user      = await account.get();
       const today     = getLocalDate();
-      const res       = await databases.listDocuments(DATABASE_ID, COLLECTIONS.steps);
-      const todayDocs = res.documents.filter(d => d.userID === user.$id && d.date === today);
+      const res       = await databases.listDocuments(DATABASE_ID, COLLECTIONS.steps,
+        [Query.equal('userID', user.$id), Query.orderDesc('loggedAt'), Query.limit(100)]);
+      const todayDocs = res.documents.filter(d => d.date === today);
       setCurrentSteps(todayDocs.reduce((s, d) => s + (d.steps || 0), 0));
       setStreak(calculateWeeklyStreak(res.documents));
     } catch (err) { console.error('❌ Load steps error:', err); }
@@ -509,12 +508,11 @@ const [streak, setStreak] = useState(0);
     const user = await account.get();
     const res = await databases.listDocuments(
       DATABASE_ID,
-      COLLECTIONS.steps
+      COLLECTIONS.steps,
+      [Query.equal('userID', user.$id), Query.orderDesc('loggedAt'), Query.limit(100)]
     );
 
-    const userDocs = res.documents.filter(
-      (d: any) => d.userID === user.$id
-    );
+    const userDocs = res.documents;
 
     const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     const weekData = Array(7).fill(0);

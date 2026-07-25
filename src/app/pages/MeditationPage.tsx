@@ -5,7 +5,7 @@ import { Header } from '../components/Header';
 import { Brain, Plus, X, Play, Pause, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useResponsive } from '../hooks/useResponsive';
-import { databases, DATABASE_ID, COLLECTIONS, ID, account } from '../../lib/appwrite';
+import { databases, DATABASE_ID, COLLECTIONS, ID, Query, account } from '../../lib/appwrite';
 
 const meditationPink   = '/assets/meditationpink.png';
 const meditationGreen  = '/assets/meditationgreen.png';
@@ -100,9 +100,9 @@ export function MeditationPage() {
   const loadSessions = async () => {
     try {
       const user = await account.get();
-      const res  = await databases.listDocuments(DATABASE_ID, COLLECTIONS.meditation);
-      const mine = res.documents.filter(d => d.userID === user.$id);
-      const mapped: MedSession[] = mine.map(doc => ({
+      const res  = await databases.listDocuments(DATABASE_ID, COLLECTIONS.meditation,
+        [Query.equal('userID', user.$id), Query.orderDesc('loggedAt'), Query.limit(100)]);
+      const mapped: MedSession[] = res.documents.map(doc => ({
         id:            doc.$id,
         date:          new Date(doc.loggedAt).toLocaleString(),
         type:          doc.sessionType   || 'Morning Calm',
